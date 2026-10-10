@@ -11,7 +11,7 @@
     "build:client": "tsc -p tsconfig.json && vite build",
     "build:server": "tsc -p tsconfig.server.json",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit",
-    "start": "node dist-server/index.js",
+    "start": "tsx server/index.ts",
     "test:health": "tsx server/test-health.ts",
     "test:groq:offline": "tsx server/test-groq-offline.ts",
     "test:gemini:offline": "tsx server/test-gemini-fallback-offline.ts",
@@ -34,6 +34,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tailwind-merge": "^3.0.1",
+    "tsx": "^4.19.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -47,7 +48,6 @@
     "concurrently": "^9.1.2",
     "postcss": "^8.5.2",
     "tailwindcss": "^3.4.17",
-    "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "vite": "^6.1.0"
   }
