@@ -9,7 +9,12 @@ import {
 } from '../types';
 import { getCurrentSession } from '../lib/supabase';
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
+const configuredBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+const BASE_URL = configuredBaseUrl
+  ? configuredBaseUrl.endsWith('/api')
+    ? configuredBaseUrl
+    : `${configuredBaseUrl}/api`
+  : '/api';
 
 /**
  * Retrieves authorization header containing active Supabase user JWT if logged in.
