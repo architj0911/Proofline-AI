@@ -11,6 +11,7 @@ import { AIService } from './services/ai-service';
 import {
   StructuredResumeExtractionSchema,
   EvaluateAnswerSchema,
+  parseModelJson,
 } from './services/ai-schemas';
 import { DefenseSession } from '../src/types';
 
@@ -666,6 +667,27 @@ async function runOfflineTests() {
       JSON.stringify(geminiKeys) === JSON.stringify(openRouterKeys) &&
         JSON.stringify(geminiProfileKeys) === JSON.stringify(openRouterProfileKeys),
       'Both Gemini and OpenRouter preserve identical application output schemas and domain contracts'
+    );
+  }
+
+  // -------------------------------------------------------------
+  // Test 15: Provider JSON wrappers are recovered without accepting partial output
+  // -------------------------------------------------------------
+  {
+    const fenced = parseModelJson('```json\n{"claims": []}\n```') as { claims: unknown[] };
+    const prefixed = parseModelJson('Structured response:\n{"claims": []}\nComplete.') as {
+      claims: unknown[];
+    };
+    let rejectedIncomplete = false;
+    try {
+      parseModelJson('{"claims": [');
+    } catch {
+      rejectedIncomplete = true;
+    }
+
+    assert(
+      fenced.claims.length === 0 && prefixed.claims.length === 0 && rejectedIncomplete,
+      'Complete JSON wrappers are recovered while incomplete JSON remains rejected'
     );
   }
 

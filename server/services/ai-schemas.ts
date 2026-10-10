@@ -78,6 +78,61 @@ export const StructuredResumeExtractionSchema = z.object({
 export type StructuredResumeExtraction = z.infer<typeof StructuredResumeExtractionSchema>;
 
 /**
+ * Parse a model response that should contain one JSON value. Some providers
+ * wrap otherwise-valid JSON in a Markdown fence or a short preamble; recover
+ * only a complete, balanced JSON object/array and leave schema validation to
+ * the caller.
+ */
+export function parseModelJson(raw: string): unknown {
+  const content = raw.replace(/^\uFEFF/, '').trim();
+  const fenced = content.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  const candidate = (fenced?.[1] ?? content).trim();
+
+  try {
+    return JSON.parse(candidate);
+  } catch {
+    // Continue only to find a single complete JSON root in surrounding text.
+  }
+
+  const start = candidate.search(/[\[{]/);
+  if (start < 0) throw new Error('Model response is not valid JSON.');
+
+  const stack: string[] = [];
+  let inString = false;
+  let escaped = false;
+
+  for (let index = start; index < candidate.length; index += 1) {
+    const char = candidate[index];
+
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (char === '\\') escaped = true;
+      else if (char === '"') inString = false;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+    if (char === '{') stack.push('}');
+    else if (char === '[') stack.push(']');
+    else if (char === '}' || char === ']') {
+      if (stack.pop() !== char) throw new Error('Model response is not valid JSON.');
+      if (stack.length === 0) {
+        try {
+          return JSON.parse(candidate.slice(start, index + 1));
+        } catch {
+          throw new Error('Model response is not valid JSON.');
+        }
+      }
+    }
+  }
+
+  throw new Error('Model response is incomplete JSON.');
+}
+
+/**
  * Question-targeted Answer Evaluation Schema
  * Evaluates candidate responses strictly against the question asked.
  */

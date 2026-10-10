@@ -14,6 +14,7 @@ import {
   buildEvaluationUserPrompt,
   formatExtractedClaimsAndProfile,
   formatEvaluationResult,
+  parseModelJson,
 } from './ai-schemas';
 
 export interface GeminiProviderOptions {
@@ -138,7 +139,9 @@ export class GeminiProvider {
         }>;
       };
 
-      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      const content = data.candidates?.[0]?.content?.parts
+        ?.map((part) => part.text || '')
+        .join('');
       if (!content || content.trim() === '') {
         const finishReason = data.candidates?.[0]?.finishReason;
         throw new Error(
@@ -168,11 +171,11 @@ export class GeminiProvider {
     const systemPrompt = buildExtractionSystemPrompt();
     const userPrompt = buildExtractionUserPrompt(resumeText);
 
-    const rawJson = await this.callGemini(systemPrompt, userPrompt, 2500);
+    const rawJson = await this.callGemini(systemPrompt, userPrompt, 4000);
 
     let parsed: unknown;
     try {
-      parsed = JSON.parse(rawJson);
+      parsed = parseModelJson(rawJson);
     } catch {
       throw new Error('Malformed JSON received from Gemini during resume extraction.');
     }
@@ -222,7 +225,7 @@ export class GeminiProvider {
 
     let parsed: unknown;
     try {
-      parsed = JSON.parse(rawJson);
+      parsed = parseModelJson(rawJson);
     } catch {
       throw new Error('Malformed JSON received from Gemini during answer evaluation.');
     }

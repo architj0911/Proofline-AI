@@ -14,6 +14,7 @@ import {
   buildEvaluationUserPrompt,
   formatExtractedClaimsAndProfile,
   formatEvaluationResult,
+  parseModelJson,
 } from './ai-schemas';
 
 export interface OpenRouterProviderOptions {
@@ -159,7 +160,7 @@ export class OpenRouterProvider {
 
     let parsed: unknown;
     try {
-      parsed = JSON.parse(rawJson);
+      parsed = parseModelJson(rawJson);
     } catch {
       throw new Error('Failed to parse OpenRouter response as valid JSON.');
     }
@@ -209,7 +210,7 @@ export class OpenRouterProvider {
 
     let parsed: unknown;
     try {
-      parsed = JSON.parse(rawJson);
+      parsed = parseModelJson(rawJson);
     } catch {
       throw new Error('Malformed JSON received when evaluating answer.');
     }
