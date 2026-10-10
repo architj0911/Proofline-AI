@@ -126,6 +126,7 @@ These results provide preliminary support for investigating resume-driven techni
 ## Method
 
 - **Instrument:** Google Forms survey about technical projects, interview preparation, and interest in an adaptive resume-defense tool.
+- **Survey form:** [Open the Google Forms survey](https://docs.google.com/forms/d/e/1FAIpQLSco3M5t-qovyjOn2Fbbx4wa4T2uf_WduiTbivTLJ9zJGqr-Ww/viewform?usp=publish-editor).
 - **Responses analysed:** 8.
 - **Collection date:** 10 October 2026, based on the timestamps in the exported response file.
 - **Privacy:** This summary omits respondent names and email addresses; the exported response file supplied for analysis contained response timestamps and answers but no name or email columns.
