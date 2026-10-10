@@ -57,6 +57,34 @@ export async function signInWithGoogle(): Promise<{ provider: string; url: strin
   return data;
 }
 
+export async function signInWithEmail(email: string, password: string): Promise<void> {
+  if (!supabase) {
+    throw new Error(
+      'Supabase is not configured. Provide VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.'
+    );
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+}
+
+/** Returns true when registration creates a session immediately; otherwise email confirmation is required. */
+export async function signUpWithEmail(email: string, password: string): Promise<boolean> {
+  if (!supabase) {
+    throw new Error(
+      'Supabase is not configured. Provide VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.'
+    );
+  }
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: `${window.location.origin}/` },
+  });
+  if (error) throw error;
+  return Boolean(data.session);
+}
+
 /**
  * Signs out the currently authenticated user.
  */

@@ -3,6 +3,8 @@ import {
   supabase,
   isSupabaseConfigured,
   signInWithGoogle,
+  signInWithEmail as supabaseSignInWithEmail,
+  signUpWithEmail as supabaseSignUpWithEmail,
   signOut as supabaseSignOut,
   User,
   Session,
@@ -15,6 +17,8 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   signIn: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
 }
 
@@ -25,6 +29,8 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: false,
   error: null,
   signIn: async () => {},
+  signInWithEmail: async () => {},
+  signUpWithEmail: async () => false,
   signOut: async () => {},
 });
 
@@ -77,6 +83,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const handleSignInWithEmail = async (email: string, password: string) => {
+    setError(null);
+    try {
+      await supabaseSignInWithEmail(email, password);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Email sign-in failed';
+      setError(message);
+      throw err;
+    }
+  };
+
+  const handleSignUpWithEmail = async (email: string, password: string) => {
+    setError(null);
+    try {
+      return await supabaseSignUpWithEmail(email, password);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Account registration failed';
+      setError(message);
+      throw err;
+    }
+  };
+
   const handleSignOut = async () => {
     try {
       setError(null);
@@ -98,6 +126,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         error,
         signIn: handleSignIn,
+        signInWithEmail: handleSignInWithEmail,
+        signUpWithEmail: handleSignUpWithEmail,
         signOut: handleSignOut,
       }}
     >
