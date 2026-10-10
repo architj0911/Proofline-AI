@@ -86,9 +86,6 @@ export const App: React.FC = () => {
     if (user && isAuthRoute) {
       window.history.replaceState({}, '', '/');
       setAuthPage(null);
-    } else if (!user && !isAuthRoute) {
-      window.history.replaceState({}, '', '/login');
-      setAuthPage('login');
     }
   }, [isAuthLoading, user]);
 
@@ -250,10 +247,10 @@ export const App: React.FC = () => {
     );
   }
 
-  if (!user) {
+  if (authPage) {
     return (
       <AuthPage
-        mode={authPage ?? 'login'}
+        mode={authPage}
         onNavigate={openAuthPage}
         onSuccess={closeAuthPage}
       />
