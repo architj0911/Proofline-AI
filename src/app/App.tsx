@@ -29,18 +29,8 @@ import {
   Loader2,
   AlertTriangle,
 } from 'lucide-react';
-import { AuthButton } from '../features/auth/AuthButton';
-import { AuthPage } from '../features/auth/AuthPage';
-import { useAuth } from '../features/auth/AuthContext';
-
 export const App: React.FC = () => {
-  const { user, isLoading: isAuthLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<'claims' | 'defense' | 'graph' | 'plan'>('claims');
-  const [authPage, setAuthPage] = useState<'login' | 'register' | null>(() => {
-    if (window.location.pathname === '/login') return 'login';
-    if (window.location.pathname === '/register') return 'register';
-    return null;
-  });
   const [health, setHealth] = useState<HealthCheckResponse | null>(null);
   const [claims, setClaims] = useState<ResumeClaim[]>([]);
   const [profile, setProfile] = useState<ResumeProfile | undefined>(undefined);
@@ -68,36 +58,6 @@ export const App: React.FC = () => {
   useEffect(() => {
     checkHealth();
   }, []);
-
-  useEffect(() => {
-    const syncAuthRoute = () => {
-      if (window.location.pathname === '/login') setAuthPage('login');
-      else if (window.location.pathname === '/register') setAuthPage('register');
-      else setAuthPage(null);
-    };
-    window.addEventListener('popstate', syncAuthRoute);
-    return () => window.removeEventListener('popstate', syncAuthRoute);
-  }, []);
-
-  useEffect(() => {
-    if (isAuthLoading) return;
-
-    const isAuthRoute = window.location.pathname === '/login' || window.location.pathname === '/register';
-    if (user && isAuthRoute) {
-      window.history.replaceState({}, '', '/');
-      setAuthPage(null);
-    }
-  }, [isAuthLoading, user]);
-
-  const openAuthPage = (mode: 'login' | 'register') => {
-    window.history.pushState({}, '', `/${mode}`);
-    setAuthPage(mode);
-  };
-
-  const closeAuthPage = () => {
-    window.history.pushState({}, '', '/');
-    setAuthPage(null);
-  };
 
   const checkHealth = async () => {
     try {
@@ -239,24 +199,6 @@ export const App: React.FC = () => {
     }
   };
 
-  if (isAuthLoading) {
-    return (
-      <main className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
-        <div className="text-sm text-slate-400">Checking your session…</div>
-      </main>
-    );
-  }
-
-  if (authPage) {
-    return (
-      <AuthPage
-        mode={authPage}
-        onNavigate={openAuthPage}
-        onSuccess={closeAuthPage}
-      />
-    );
-  }
-
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
       {/* Top Navigation Bar */}
@@ -301,7 +243,6 @@ export const App: React.FC = () => {
                 )}
               </div>
             )}
-            <AuthButton onOpenAuth={openAuthPage} />
           </div>
         </div>
       </header>
